@@ -33,8 +33,27 @@ db.properties
 
 # Log files
 *.log
+logs/
 
-# Dashboard build files if any
+# Spring Boot specific
+application-local.properties
+application-local.yml
+application-dev.properties
+application-dev.yml
+
+# Environment files
+.env
+*.env
+.env.*
+
+# Compiled class files
+*.class
+*.jar
+*.war
+
+# Dashboard build files
 node_modules/
 dist/
-.env
+
+# Docker local volumes
+docker-volumes/
