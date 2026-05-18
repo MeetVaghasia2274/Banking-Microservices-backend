@@ -1,4 +1,4 @@
-const API_GATEWAY = 'https://api-gateway-xtfx.onrender.com';
+const API_GATEWAY = 'https://api-gateway-xtfx.onrender.com/api';
 
 // Application State
 let token = localStorage.getItem('token');
