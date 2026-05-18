@@ -1,4 +1,4 @@
-const API_GATEWAY = 'http://localhost:8080/api';
+const API_GATEWAY = 'https://api-gateway-xtfx.onrender.com';
 
 // Application State
 let token = localStorage.getItem('token');
@@ -98,7 +98,7 @@ async function handleLogin(event) {
             user = { id: data.id, name: data.name, email: data.email };
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
-            
+
             alertBox.className = 'mb-4 p-4 rounded-xl text-sm flex items-center gap-2 bg-green-500/10 border border-green-500/20 text-green-400';
             alertBox.innerHTML = '<i class="fa-solid fa-circle-check"></i> Sign In Successful!';
             alertBox.classList.remove('hidden');
@@ -157,7 +157,7 @@ async function handleLogout() {
     try {
         await fetch(`${API_GATEWAY}/users/logout`, {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             }
@@ -197,10 +197,10 @@ async function fetchAccounts() {
         const response = await fetch(`${API_GATEWAY}/accounts/${user.id}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        
+
         if (!response.ok) throw new Error('Failed to retrieve accounts');
         accounts = await response.json();
-        
+
         renderAccounts();
         updateTransferDropdowns();
     } catch (error) {
@@ -211,7 +211,7 @@ async function fetchAccounts() {
 // Render Accounts Cards
 function renderAccounts() {
     const container = document.getElementById('accounts-container');
-    
+
     if (accounts.length === 0) {
         container.innerHTML = `
             <div class="h-full flex flex-col items-center justify-center text-center p-8 text-slate-500">
@@ -229,7 +229,7 @@ function renderAccounts() {
 
     accounts.forEach(acc => {
         netWorth += acc.balance;
-        
+
         html += `
             <div class="p-5 bg-white/5 border border-white/10 hover:border-violet-500/30 rounded-2xl flex items-center justify-between transition-all">
                 <div class="flex items-center gap-4">
@@ -305,7 +305,7 @@ function renderNotifications(notifications) {
 
     container.innerHTML = notifications.map(notif => {
         const date = new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        
+
         return `
             <div class="p-4 bg-white/5 border border-white/10 hover:bg-white/10 rounded-2xl flex items-start gap-3 transition-all">
                 <div class="w-8 h-8 shrink-0 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
@@ -335,9 +335,9 @@ async function handleTransfer(event) {
     try {
         const response = await fetch(`${API_GATEWAY}/transactions/transfer`, {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` 
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ fromAccountId, toAccountId, amount, description })
         });
@@ -385,9 +385,9 @@ async function handleCreateAccount(event) {
     try {
         const response = await fetch(`${API_GATEWAY}/accounts`, {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` 
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ userId: user.id, accountType })
         });
@@ -434,9 +434,9 @@ async function handleFundAccount(event) {
     try {
         const response = await fetch(`${API_GATEWAY}/accounts/balance/${accountId}`, {
             method: 'PUT',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` 
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ balance })
         });
