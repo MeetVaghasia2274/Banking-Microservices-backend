@@ -21,12 +21,19 @@ public class RateLimiterConfig {
     @Bean
     public org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer lettuceClientCustomizer() {
         return builder -> {
+            String redisHost = System.getenv("REDIS_HOST");
             String redisUrl = System.getenv("REDIS_URL");
             String redisSsl = System.getenv("REDIS_SSL");
-            if ((redisUrl != null && redisUrl.startsWith("rediss://")) || "true".equalsIgnoreCase(redisSsl)) {
+            
+            boolean isCloud = (redisHost != null && !redisHost.equals("localhost") && !redisHost.equals("127.0.0.1"))
+                    || (redisUrl != null && !redisUrl.contains("localhost") && !redisUrl.contains("127.0.0.1"))
+                    || "true".equalsIgnoreCase(redisSsl);
+            
+            if (isCloud) {
                 builder.useSsl().disablePeerVerification();
             }
         };
     }
+
 
 }

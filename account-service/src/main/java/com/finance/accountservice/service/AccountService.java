@@ -48,10 +48,13 @@ public class AccountService {
 
     public BigDecimal getBalance(Long accountId) {
         String cacheKey = "balance:" + accountId;
-        String cachedBalance = redisTemplate.opsForValue().get(cacheKey);
-
-        if (cachedBalance != null) {
-            return new BigDecimal(cachedBalance);
+        try {
+            String cachedBalance = redisTemplate.opsForValue().get(cacheKey);
+            if (cachedBalance != null) {
+                return new BigDecimal(cachedBalance);
+            }
+        } catch (Exception e) {
+            System.err.println("[WARN] Redis is unavailable for getBalance: " + e.getMessage());
         }
 
         Account account = accountRepository.findById(accountId)
@@ -59,8 +62,12 @@ public class AccountService {
 
         BigDecimal balance = account.getBalance();
         
-        // Cache-aside pattern: cache balance for 5 minutes (300 seconds)
-        redisTemplate.opsForValue().set(cacheKey, balance.toString(), 300, TimeUnit.SECONDS);
+        try {
+            // Cache-aside pattern: cache balance for 5 minutes (300 seconds)
+            redisTemplate.opsForValue().set(cacheKey, balance.toString(), 300, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            System.err.println("[WARN] Redis is unavailable to set balance cache: " + e.getMessage());
+        }
         
         return balance;
     }
@@ -72,10 +79,15 @@ public class AccountService {
         account.setBalance(amount);
         Account updatedAccount = accountRepository.save(account);
 
-        // Invalidate Redis cache on balance update
-        String cacheKey = "balance:" + accountId;
-        redisTemplate.delete(cacheKey);
+        try {
+            // Invalidate Redis cache on balance update
+            String cacheKey = "balance:" + accountId;
+            redisTemplate.delete(cacheKey);
+        } catch (Exception e) {
+            System.err.println("[WARN] Redis is unavailable to delete balance cache: " + e.getMessage());
+        }
 
         return updatedAccount;
     }
+
 }

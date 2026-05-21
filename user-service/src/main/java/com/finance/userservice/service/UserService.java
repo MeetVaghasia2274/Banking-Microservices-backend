@@ -75,9 +75,14 @@ public class UserService {
 
                 if (remainingMillis > 0) {
                     String redisKey = "blacklist:" + token;
-                    redisTemplate.opsForValue().set(redisKey, "true", remainingMillis, TimeUnit.MILLISECONDS);
+                    try {
+                        redisTemplate.opsForValue().set(redisKey, "true", remainingMillis, TimeUnit.MILLISECONDS);
+                    } catch (Exception e) {
+                        System.err.println("[WARN] Redis is unavailable to blacklist token: " + e.getMessage());
+                    }
                     System.out.println("Blacklisted token: " + token + " for " + remainingMillis + " ms");
                 }
+
             }
         }
     }
