@@ -17,4 +17,16 @@ public class RateLimiterConfig {
             return Mono.just("rate:ip:" + ip);
         };
     }
+
+    @Bean
+    public org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer lettuceClientCustomizer() {
+        return builder -> {
+            String redisUrl = System.getenv("REDIS_URL");
+            String redisSsl = System.getenv("REDIS_SSL");
+            if ((redisUrl != null && redisUrl.startsWith("rediss://")) || "true".equalsIgnoreCase(redisSsl)) {
+                builder.useSsl().disablePeerVerification();
+            }
+        };
+    }
+
 }
