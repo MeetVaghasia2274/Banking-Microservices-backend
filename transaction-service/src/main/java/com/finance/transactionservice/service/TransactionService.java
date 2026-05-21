@@ -92,7 +92,11 @@ public class TransactionService {
 
     private AccountDto fetchAccountDetails(Long accountId) {
         try {
-            String url = accountServiceUrl + "/details/" + accountId;
+            String baseUrl = accountServiceUrl;
+            if (!baseUrl.contains("/api/accounts")) {
+                baseUrl = baseUrl.endsWith("/") ? baseUrl + "api/accounts" : baseUrl + "/api/accounts";
+            }
+            String url = baseUrl + "/details/" + accountId;
             return restTemplate.getForObject(url, AccountDto.class);
         } catch (Exception e) {
             throw new RuntimeException("Failed to fetch account details for accountId: " + accountId + ". Error: " + e.getMessage());
@@ -101,7 +105,11 @@ public class TransactionService {
 
     private void updateAccountBalance(Long accountId, BigDecimal newBalance) {
         try {
-            String url = accountServiceUrl + "/balance/" + accountId;
+            String baseUrl = accountServiceUrl;
+            if (!baseUrl.contains("/api/accounts")) {
+                baseUrl = baseUrl.endsWith("/") ? baseUrl + "api/accounts" : baseUrl + "/api/accounts";
+            }
+            String url = baseUrl + "/balance/" + accountId;
             Map<String, BigDecimal> requestBody = new HashMap<>();
             requestBody.put("balance", newBalance);
             restTemplate.put(url, requestBody);
