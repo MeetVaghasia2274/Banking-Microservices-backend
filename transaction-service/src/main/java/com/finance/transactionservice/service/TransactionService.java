@@ -26,7 +26,7 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final RestTemplate restTemplate;
-    private final KafkaTemplate<String, TransactionEvent> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Value("${app.account-service.url}")
     private String accountServiceUrl;
