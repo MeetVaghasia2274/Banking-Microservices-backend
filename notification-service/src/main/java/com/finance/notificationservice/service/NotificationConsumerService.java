@@ -72,7 +72,11 @@ public class NotificationConsumerService {
 
     private AccountDto fetchAccountDetailsByNumber(String accountNumber) {
         try {
-            String url = accountServiceUrl + "/details/number/" + accountNumber;
+            String baseUrl = accountServiceUrl;
+            if (!baseUrl.contains("/api/accounts")) {
+                baseUrl = baseUrl.endsWith("/") ? baseUrl + "api/accounts" : baseUrl + "/api/accounts";
+            }
+            String url = baseUrl + "/details/number/" + accountNumber;
             return restTemplate.getForObject(url, AccountDto.class);
         } catch (Exception e) {
             System.err.println("Could not fetch account details for account number: " + accountNumber + ". Error: " + e.getMessage());
