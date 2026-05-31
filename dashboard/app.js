@@ -77,12 +77,28 @@ function switchAuthTab(tab) {
     }
 }
 
+// Loading State Helper — disables button, shows spinner + message, returns restore function
+function showLoading(button, msg = 'Processing...') {
+    const original = button.innerHTML;
+    const originalDisabled = button.disabled;
+    button.disabled = true;
+    button.classList.add('opacity-70', 'cursor-not-allowed');
+    button.innerHTML = `<svg class="animate-spin h-4 w-4 mr-2 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>${msg}`;
+    return () => {
+        button.disabled = originalDisabled;
+        button.classList.remove('opacity-70', 'cursor-not-allowed');
+        button.innerHTML = original;
+    };
+}
+
 // Login Handler
 async function handleLogin(event) {
     event.preventDefault();
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
     const alertBox = document.getElementById('auth-alert');
+    const btn = event.target.querySelector('button[type="submit"]');
+    const restore = showLoading(btn, 'Signing in...');
 
     try {
         const response = await fetch(`${API_GATEWAY}/users/login`, {
@@ -113,6 +129,8 @@ async function handleLogin(event) {
         alertBox.className = 'mb-4 p-4 rounded-xl text-sm flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400';
         alertBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${error.message}`;
         alertBox.classList.remove('hidden');
+    } finally {
+        restore();
     }
 }
 
@@ -123,6 +141,8 @@ async function handleRegister(event) {
     const email = document.getElementById('register-email').value;
     const password = document.getElementById('register-password').value;
     const alertBox = document.getElementById('auth-alert');
+    const btn = event.target.querySelector('button[type="submit"]');
+    const restore = showLoading(btn, 'Creating account...');
 
     try {
         const response = await fetch(`${API_GATEWAY}/users/register`, {
@@ -149,6 +169,8 @@ async function handleRegister(event) {
         alertBox.className = 'mb-4 p-4 rounded-xl text-sm flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400';
         alertBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${error.message}`;
         alertBox.classList.remove('hidden');
+    } finally {
+        restore();
     }
 }
 
@@ -331,6 +353,8 @@ async function handleTransfer(event) {
     const amount = parseFloat(document.getElementById('transfer-amount').value);
     const description = document.getElementById('transfer-description').value;
     const alertBox = document.getElementById('transfer-alert');
+    const btn = event.target.querySelector('button[type="submit"]');
+    const restore = showLoading(btn, 'Transferring funds...');
 
     try {
         const response = await fetch(`${API_GATEWAY}/transactions/transfer`, {
@@ -364,6 +388,8 @@ async function handleTransfer(event) {
         alertBox.className = 'mb-4 p-4 rounded-xl text-sm flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400';
         alertBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${error.message}`;
         alertBox.classList.remove('hidden');
+    } finally {
+        restore();
     }
 }
 
@@ -381,6 +407,8 @@ async function handleCreateAccount(event) {
     event.preventDefault();
     const accountType = document.getElementById('modal-account-type').value;
     const alertBox = document.getElementById('modal-alert');
+    const btn = event.target.querySelector('button[type="submit"]');
+    const restore = showLoading(btn, 'Opening account...');
 
     try {
         const response = await fetch(`${API_GATEWAY}/accounts`, {
@@ -410,6 +438,8 @@ async function handleCreateAccount(event) {
         alertBox.className = 'mb-4 p-4 rounded-xl text-sm flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400';
         alertBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${error.message}`;
         alertBox.classList.remove('hidden');
+    } finally {
+        restore();
     }
 }
 
@@ -430,6 +460,8 @@ async function handleFundAccount(event) {
     const accountId = document.getElementById('fund-account-id').value;
     const balance = parseFloat(document.getElementById('fund-amount').value);
     const alertBox = document.getElementById('fund-modal-alert');
+    const btn = event.target.querySelector('button[type="submit"]');
+    const restore = showLoading(btn, 'Depositing funds...');
 
     try {
         const response = await fetch(`${API_GATEWAY}/accounts/balance/${accountId}`, {
@@ -459,6 +491,8 @@ async function handleFundAccount(event) {
         alertBox.className = 'mb-4 p-4 rounded-xl text-sm flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400';
         alertBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${error.message}`;
         alertBox.classList.remove('hidden');
+    } finally {
+        restore();
     }
 }
 
