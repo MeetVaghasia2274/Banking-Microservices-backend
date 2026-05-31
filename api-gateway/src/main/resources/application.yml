@@ -1,22 +1,22 @@
 spring:
   application:
     name: api-gateway
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      ssl: ${REDIS_SSL:true}
 management:
   endpoints:
     web:
       exposure:
         include: health
-  data:
+  health:
     redis:
-      url: ${REDIS_URL:redis://localhost:6379}
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
-      ssl:
-        enabled: ${REDIS_SSL:false}
+      enabled: false
 
-
-
+spring:
   cloud:
     gateway:
       globalcors:
