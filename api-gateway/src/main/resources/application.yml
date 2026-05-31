@@ -1,6 +1,11 @@
 spring:
   application:
     name: api-gateway
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
   data:
     redis:
       url: ${REDIS_URL:redis://localhost:6379}
