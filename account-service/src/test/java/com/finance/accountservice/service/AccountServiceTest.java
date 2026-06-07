@@ -13,9 +13,13 @@ import org.springframework.data.redis.core.ValueOperations;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,35 +38,67 @@ class AccountServiceTest {
     private AccountService accountService;
 
     @Test
-    void shouldReturnCachedBalanceFromRedis() {
+    void getBalance_FromRedisCache_DbNotHit() {
+        // Arrange
+        Long accountId = 1L;
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(valueOperations.get("balance:1")).thenReturn("5000.00");
+        when(valueOperations.get("balance:1")).thenReturn("500.00");
 
-        BigDecimal balance = accountService.getBalance(1L);
+        // Act
+        BigDecimal balance = accountService.getBalance(accountId);
 
-        assertEquals(new BigDecimal("5000.00"), balance);
-        verify(accountRepository, never()).findById(any()); // DB was NOT hit
+        // Assert
+        assertEquals(new BigDecimal("500.00"), balance);
+        verify(accountRepository, never()).findById(anyLong());
     }
 
     @Test
-    void shouldFetchBalanceFromDbAndCacheIfNotFoundInRedis() {
+    void getBalance_CacheEmpty_HitsDbAndStoresInRedis() {
+        // Arrange
+        Long accountId = 1L;
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get("balance:1")).thenReturn(null);
 
         Account account = Account.builder()
-                .id(1L)
-                .userId(100L)
-                .accountNumber("ACC123")
-                .accountType(AccountType.SAVINGS)
-                .balance(new BigDecimal("5000.00"))
+                .id(accountId)
+                .balance(new BigDecimal("1000.00"))
                 .build();
 
-        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
 
-        BigDecimal balance = accountService.getBalance(1L);
+        // Act
+        BigDecimal balance = accountService.getBalance(accountId);
 
-        assertEquals(new BigDecimal("5000.00"), balance);
-        verify(accountRepository, times(1)).findById(1L);
-        verify(valueOperations, times(1)).set(eq("balance:1"), eq("5000.00"), eq(300L), any());
+        // Assert
+        assertEquals(new BigDecimal("1000.00"), balance);
+        verify(accountRepository, times(1)).findById(accountId);
+        verify(valueOperations, times(1)).set("balance:1", "1000.00", 300, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void createAccount_Success() {
+        // Arrange
+        Long userId = 1L;
+        AccountType type = AccountType.SAVINGS;
+
+        Account savedAccount = Account.builder()
+                .id(100L)
+                .userId(userId)
+                .accountNumber("ACC12345678")
+                .accountType(type)
+                .balance(BigDecimal.ZERO)
+                .build();
+
+        when(accountRepository.save(any(Account.class))).thenReturn(savedAccount);
+
+        // Act
+        Account account = accountService.createAccount(userId, type);
+
+        // Assert
+        assertNotNull(account);
+        assertEquals(100L, account.getId());
+        assertEquals("ACC12345678", account.getAccountNumber());
+        assertEquals(BigDecimal.ZERO, account.getBalance());
+        verify(accountRepository, times(1)).save(any(Account.class));
     }
 }

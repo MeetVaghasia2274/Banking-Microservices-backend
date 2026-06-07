@@ -1,6 +1,42 @@
 # 🏦 Personal Finance Management System
 
+![Java](https://img.shields.io/badge/Java_17-ED8B00?style=flat&logo=java)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot_3-6DB33F?style=flat&logo=springboot)
+![Kafka](https://img.shields.io/badge/Apache_Kafka-231F20?style=flat&logo=apachekafka)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=redis)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker)
+![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql)
+
 A high-performance, containerized, microservices-based **Personal Finance Management System** built with **Java 17**, **Spring Boot 3.x**, **Spring Cloud Gateway**, **Redis**, **Apache Kafka**, **Docker**, and **MySQL**.
+
+---
+
+## 🌐 Live Deployment
+> Services are live Mon-Sat, 10 AM - 7 PM IST (Render free tier)
+
+| Service | URL |
+|---|---|
+| API Gateway | https://api-gateway-xtfx.onrender.com |
+| User Service | https://user-service-heo8.onrender.com |
+| Account Service | https://account-service-ed51.onrender.com |
+| Transaction Service | https://transaction-service-bl5d.onrender.com |
+| Notification Service | https://notification-service-8nqk.onrender.com |
+
+---
+
+## ⚠️ Known Limitations
+- Deployed on Render free tier — services are live Mon-Sat 10 AM–7 PM IST
+- Aiven Kafka free tier powers off after 24hrs of inactivity
+- TiDB serverless free tier (5GB storage limit)
+
+---
+
+## 💼 Resume Summary
+Built a microservices-based Personal Finance System using Java 17, Spring Boot 3, 
+Spring Cloud Gateway, Apache Kafka, Redis, Docker, and MySQL. Implemented JWT auth 
+with Redis token blacklisting, event-driven notifications via Kafka, cache-aside 
+pattern for balance caching, and rate limiting at the API Gateway. Deployed on 
+cloud infrastructure (Render, TiDB, Upstash, Aiven) at zero cost.
 
 ---
 
@@ -140,6 +176,8 @@ Execute them in the following suggested sequence:
 ## 🧪 Testing Your APIs
 
 You can perform testing directly using Postman:
+
+> 💡 **For live testing**, replace `localhost:8080` with `https://api-gateway-xtfx.onrender.com`
 
 1. **Register a User**:
    - `POST http://localhost:8080/api/users/register`
