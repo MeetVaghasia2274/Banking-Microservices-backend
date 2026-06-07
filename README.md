@@ -40,6 +40,26 @@ cloud infrastructure (Render, TiDB, Upstash, Aiven) at zero cost.
 
 ---
 
+## 🛠️ Tech Stack
+| Category | Technology |
+|---|---|
+| Language | Java 17 |
+| Framework | Spring Boot 3, Spring Cloud Gateway |
+| Messaging | Apache Kafka (Aiven) |
+| Cache | Redis (Upstash) |
+| Database | MySQL (TiDB Serverless) |
+| Security | JWT, BCrypt, OAuth2 |
+| DevOps | Docker, Render |
+
+---
+
+## ✅ Unit Tests
+- User Service — registration, login, duplicate email, wrong password
+- Account Service — Redis cache hit/miss, balance update
+- Run with: `mvn test`
+
+---
+
 ## 🏗️ Architecture Overview
 
 ### System Topology
@@ -199,9 +219,11 @@ You can perform testing directly using Postman:
 
 5. **Get Balance (Checks Redis Cache)**:
    - `GET http://localhost:8080/api/accounts/balance/1`
+   - Header: `Authorization: Bearer <TOKEN>`
 
 6. **Deposit / Adjust Balance**:
    - `PUT http://localhost:8080/api/accounts/balance/1`
+   - Header: `Authorization: Bearer <TOKEN>`
    - Body: `{"balance": 1000.00}`
 
 7. **Transfer Money (Triggers Kafka notification events)**:
@@ -210,3 +232,4 @@ You can perform testing directly using Postman:
 
 8. **View Notifications**:
    - `GET http://localhost:8080/api/notifications/1`
+   - Header: `Authorization: Bearer <TOKEN>`
