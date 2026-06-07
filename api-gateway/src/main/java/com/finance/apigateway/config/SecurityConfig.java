@@ -31,7 +31,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeExchange(auth -> auth
                 .pathMatchers("/api/users/login", "/api/users/register").permitAll()
-                .pathMatchers("/actuator/**").permitAll()
+                .pathMatchers("/actuator/**", "/ws/notifications/**").permitAll()
                 .anyExchange().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2

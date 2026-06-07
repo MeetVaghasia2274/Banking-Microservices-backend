@@ -4,6 +4,7 @@ import com.finance.notificationservice.model.AccountDto;
 import com.finance.notificationservice.model.Notification;
 import com.finance.notificationservice.model.TransactionEvent;
 import com.finance.notificationservice.repository.NotificationRepository;
+import com.finance.notificationservice.websocket.NotificationWebSocketHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -16,6 +17,7 @@ public class NotificationConsumerService {
 
     private final NotificationRepository notificationRepository;
     private final RestTemplate restTemplate;
+    private final NotificationWebSocketHandler webSocketHandler;
 
     @Value("${app.account-service.url}")
     private String accountServiceUrl;
@@ -38,6 +40,7 @@ public class NotificationConsumerService {
                         .build();
                 
                 notificationRepository.save(senderNotification);
+                webSocketHandler.sendNotification(senderAccount.getUserId(), senderNotification);
                 
                 // Simulate SMS/Email Logging
                 System.out.println("[SMS/EMAIL SENT to User " + senderAccount.getUserId() + "]: " + senderMessage);
@@ -56,6 +59,7 @@ public class NotificationConsumerService {
                         .build();
                 
                 notificationRepository.save(receiverNotification);
+                webSocketHandler.sendNotification(receiverAccount.getUserId(), receiverNotification);
                 
                 // Simulate SMS/Email Logging
                 System.out.println("[SMS/EMAIL SENT to User " + receiverAccount.getUserId() + "]: " + receiverMessage);

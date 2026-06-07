@@ -16,11 +16,11 @@ function initApp() {
         showSection('dashboard-section');
         updateNavUser(true);
         loadDashboard();
-        startAutoRefresh();
+        connectWebSocket();
     } else {
         showSection('auth-section');
         updateNavUser(false);
-        stopAutoRefresh();
+        disconnectWebSocket();
     }
 }
 
@@ -506,18 +506,87 @@ function refreshAccounts() {
     fetchAccounts();
 }
 
-// Live Updates Poller
-function startAutoRefresh() {
-    if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-    // Poll notifications every 4 seconds to catch active transfers
-    autoRefreshInterval = setInterval(() => {
+// WebSocket Integration for Live Updates
+let ws = null;
+
+function connectWebSocket() {
+    if (!user) return;
+    
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    // If running locally, you might want to map this to localhost:8080.
+    // Assuming API_GATEWAY is something like 'https://api-gateway.onrender.com/api'
+    const wsHost = API_GATEWAY.replace('/api', '').replace('http', 'ws');
+    
+    ws = new WebSocket(`${wsHost}/ws/notifications?userId=${user.id}`);
+    
+    ws.onopen = () => {
+        console.log('Connected to Live WebSocket Notifications');
+        // We still fetch initial past notifications once on load
         fetchNotifications();
-    }, 4000);
+    };
+    
+    ws.onmessage = (event) => {
+        const notification = JSON.parse(event.data);
+        console.log('Received live notification:', notification);
+        appendLiveNotification(notification);
+        
+        // Also refresh accounts to get latest balances
+        fetchAccounts();
+    };
+    
+    ws.onclose = () => {
+        console.log('WebSocket disconnected. Will try to reconnect in 5s...');
+        setTimeout(() => {
+            if (token && user) connectWebSocket();
+        }, 5000);
+    };
+    
+    ws.onerror = (error) => {
+        console.error('WebSocket Error:', error);
+        ws.close();
+    };
 }
 
-function stopAutoRefresh() {
-    if (autoRefreshInterval) {
-        clearInterval(autoRefreshInterval);
-        autoRefreshInterval = null;
+function disconnectWebSocket() {
+    if (ws) {
+        ws.close();
+        ws = null;
     }
+}
+
+// Prepend single live notification to the UI
+function appendLiveNotification(notif) {
+    const container = document.getElementById('notifications-container');
+    const badge = document.getElementById('alerts-count');
+    
+    // Remove the "No notifications" empty state if it exists
+    if (container.innerHTML.includes('fa-clock-rotate-left')) {
+        container.innerHTML = '';
+    }
+
+    const date = new Date(notif.createdAt || new Date()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+    const html = `
+        <div class="p-4 bg-violet-500/20 border border-violet-500/50 rounded-2xl flex items-start gap-3 transition-all animate-pulse">
+            <div class="w-8 h-8 shrink-0 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                <i class="fa-solid fa-message text-xs"></i>
+            </div>
+            <div class="flex-1">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] text-slate-500">Live • ${date}</span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                </div>
+                <p class="text-xs text-slate-100 mt-1 leading-relaxed">${notif.message}</p>
+            </div>
+        </div>
+    `;
+    
+    // Add to top
+    container.insertAdjacentHTML('afterbegin', html);
+    
+    // Update badge count
+    const currentText = badge.innerText;
+    let count = parseInt(currentText) || 0;
+    count++;
+    badge.innerText = `${count} Alert${count === 1 ? '' : 's'}`;
 }
